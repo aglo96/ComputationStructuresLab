@@ -1,0 +1,60 @@
+.include "nominal.jsim"
+.include "lab2checkoff.jsim"
+
+//nor2 gate
+.subckt nor2 a b z
+MPD1 z a 0 0 NENH sw=8 sl=1
+MPD2 z b 0 0 NENH sw=8 sl=1
+MPU1 1 a vdd vdd PENH sw=8 sl=1
+MPU2 z b 1 vdd PENH sw=8 sl=1
+.ends
+
+//nand2
+.subckt nand2 a b z
+MPD1 z a 1 0 NENH sw=8 sl=1
+MPD2 1 b 0 0 NENH sw=8 sl=1
+MPU1 z a vdd vdd PENH sw=8 sl=1
+MPU2 z b vdd vdd PENH sw=8 sl=1
+.ends 
+
+//nand3
+.subckt nand3 a b c z
+MPD1 z a 1 0 NENH sw=8 sl=1 
+MPD2 1 b 2 0 NENH sw=8 sl=1 
+MPD3 2 c 0 0 NENH sw=8 sl=1 
+MPU1 z a vdd vdd PENH sw=8 sl=1
+MPU2 z b vdd vdd PENH sw=8 sl=1
+MPU3 z c vdd vdd PENH sw=8 sl=1
+.ends
+
+//xor2
+.subckt xor2 a b z
+Xg0 a b p nor2
+MPD1 z a 2 0 NENH sw=8 sl=1 
+MPD2 2 b 0 0 NENH sw=8 sl=1 
+MPD3 z p 0 0 NENH sw=8 sl=1 
+MPU1 1 a vdd vdd PENH sw=8 sl=1
+MPU2 1 b vdd vdd PENH sw=8 sl=1
+MPU3 z p 1 vdd PENH sw=8 sl=1
+.ends
+
+.subckt FA a b ci s co
+Xg1 a b x xor2
+Xg2 x ci s xor2
+Xg3 a b y1 nand2
+Xg4 a ci y2 nand2
+Xg5 b ci y3 nand2
+Xg6 y1 y2 y3 co nand3 
+.ends
+
+.subckt ADDER4 a3 a2 a1 a0 b3 b2 b1 b0 s4 s3 s2 s1 s0
+* remember the node named "0" is the ground node
+* nodes c0 through c3 are internal to the ADDER module
+Xbit0 a0 b0 0 s0 c0 FA
+Xbit1 a1 b1 c0 s1 c1 FA
+Xbit2 a2 b2 c1 s2 c2 FA
+Xbit3 a3 b3 c2 s3 s4 FA
+.ends
+
+.plot Xtest.c0
+

@@ -1,0 +1,129 @@
+.include beta.uasm
+.include lab5checkoff.uasm
+
+count_bull_cows:
+	PUSH(LP)	|ENTRY SEQUENCE
+	PUSH(BP)
+	MOVE(SP,BP)
+	PUSH(R1) 	|B
+	PUSH(R2)	|A
+	PUSH(R3)	|BULLS
+	PUSH(R4)	|MASKS
+	PUSH(R5)	|i
+	PUSH(R6)	
+	PUSH(R7)
+	PUSH(R8)
+	PUSH(R9)
+	PUSH(R10)	|R10 = COWS
+	PUSH(R11)	|R11 = i for secondloop
+	PUSH(R12)
+	PUSH(R13)	|r13 = atry
+	PUSH(R14)	|r14 = btemp
+	PUSH(R15)   	|r15 = btry
+	PUSH(R16)
+	PUSH(R17)	|R16 = j counter
+	PUSH(R18)
+	PUSH(R19)
+	LD(BP,-16,R1) |R1 = B
+	LD(BP,-12,R2)	|R2 = A
+	CMOVE(0,R3)  |R3 = BULLS
+	CMOVE(0xF,R4) |R4 = mask
+	CMOVE(0,R5)  |R5 = i (counter for first for loop)
+	
+	BR(firstforloopcheck)
+
+
+for1:	
+	AND(R2,R4,R7) |A AND MASK
+	AND(R1,R4,R8)	|B AND MASK
+	CMPEQ(R7,R8,R9)	|if true; r9=1
+	BF(R9,L1,R31)	|IF FALSE, branch to L1
+	ADDC(R3,1,R3)   |IF TRUE, CONTINUE EXECUTION 
+	OR(R2,R4,R2)
+	OR(R1,R4,R1)
+
+L1: 	
+	SHLC(R4,4,R4)	|SHL MASK
+	ADDC(R5,1,R5) | increment i counter
+
+firstforloopcheck:
+	CMPLTC(R5,4,R6)
+	BT(R6,for1,R31) 	
+	|end of first for loop
+
+	CMOVE(0,R10) 	|R10 = cows = 0
+	CMOVE(0,R11)  	|R11 = i for secondloop
+	BR(secondforloopcheck)
+
+for2:
+	ANDC(R2,0xF,R13)  |R13 = ATRY
+	SHRC(R2,4,R2)  	  |SHIFT RIGHT FOR a
+	CMPEQC(R13,0xF,R16)
+	BT(R16,L2,R31) 	   |IF ATRY == 0xF go and increment counter i
+	MOVE(R1,R14)	|BTEMP = B
+	CMOVE(0xF,R4)	|MASK = 0xF
+	
+	CMOVE(0,R17)    |R17 = COUNTER J
+	BR(thirdforloopcheck)		
+
+for3: 
+	ANDC(R14,0xF,R15)
+	SHRC(R14,4,R14)
+	CMPEQ(R15,R13,R19) |IF BTRY == ATRY
+	BF(R19,L3,R31)	|IF !=
+	ADDC(R10,1,R10)
+	OR(R1,R4,R1)	| B | MASK	
+	BR(L2)     	|BREAK
+L3:
+	SHLC(R4,4,R4) 	|shift left mask	
+	ADDC(R17,1,R17)	|increment counter j
+
+thirdforloopcheck:
+	CMPLTC(R17,4,R18)
+	BT(R18,for3,R31)
+	|end of third for loop
+
+
+
+L2:
+	ADDC(R11,1,R11)	|increment counter i
+
+
+
+secondforloopcheck:
+	CMPLTC(R11,4,R12)
+	BT(R12,for2,R31)
+	|end of second for loop
+	
+	SHLC(R3,4,R3) |BULLS<<4
+	ADD(R3,R10,0) |RETURN
+	
+	 
+
+	POP(R19)
+	POP(R18)
+	POP(R17)
+	POP(R16)
+	POP(R15)
+	POP(R14)
+	POP(R13)
+	POP(R12)
+	POP(R11)
+	POP(R10)
+	POP(R9)
+	POP(R8)
+	POP(R7)
+	POP(R6)
+	POP(R5)
+	POP(R4)
+	POP(R3)
+	POP(R2)
+	POP(R1)
+	MOVE(BP,SP)	| standard subroutine exit sequence
+	POP(BP)
+	POP(LP)
+	RTN()   |JMP(LP)
+
+StackBase: 
+	LONG(.+4) | Pointer to bottom of stack
+	. = .+0x1000 | Reserve space for stack...

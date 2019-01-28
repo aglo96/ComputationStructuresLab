@@ -1,0 +1,160 @@
+.include "nominal.jsim"
+.include "stdcell.jsim"
+.include "lab3checkoff_10.jsim"
+
+
+
+.subckt FA a b ci s co
+Xg1 a b x xor2
+Xg2 x ci s xor2
+Xg3 a b y1 nand2
+Xg4 a ci y2 nand2
+Xg5 b ci y3 nand2
+Xg6 y1 y2 y3 co nand3 
+.ends
+
+.subckt adder32 ALUFN[0] A[31:0] B[31:0] s[31:0] z v n
+XOrgate B[31:0] ALUFN[0]#32 XB[31:0] xor2
+XADD1 A[0] XB[0] ALUFN[0] S[0] C[0] FA
+XADD2 A[30:1] XB[30:1] C[29:0] S[30:1] C[30:1] FA
+XADD3 A[31] XB[31] C[30] S[31] C[31] FA
+
+
+XZ1 S[7:0] S[15:8] S[23:16] S[31:24] out1[7:0] or4
+XZ2 out1[1:0] out1[3:2] out1[5:4] out1[7:6] out2[1:0] or4
+XZ3 out2[0] out2[1] z nor2 
+
+XV1 A[31] XAnot inverter
+XV2 XB[31] XBnot inverter
+XV3 S[31] Snot inverter
+XV4 A[31] XB[31] Snot r1 and3
+XV5 XAnot XBnot S[31] r2 and3
+XV6 r1 r2 v or2
+
+.connect n S[31]
+.ends
+
+
+
+
+.subckt compare32 ALUFN[2:1] z v n cmp[31:0]
+.connect 0 cmp[31:1]
+X1 n v out1 xor2
+X2 z out1 out2 or2
+X3 ALUFN[2] ALUFN[1] 0 out1 z out2 cmp[0] mux4
+.ends
+
+
+
+.subckt boole32 ALUFN[3:0] A[31:0] B[31:0] boole[31:0]
+X1 A[31:0] B[31:0] ALUFN[0]#32 ALUFN[1]#32 ALUFN[2]#32 ALUFN[3]#32 boole[31:0] mux4
+.ends 
+
+
+
+
+.subckt shift32 ALUFN[1:0] A[31:0] B[4:0] shift[31:0]
+XSHL1 B[4]#32 A[31:0] A[15:0] 0#16 W[31:0] mux2
+XSHL2 B[3]#32 W[31:0] W[23:0] 0#8 X[31:0] mux2
+XSHL3 B[2]#32 X[31:0] X[27:0] 0#4 Y[31:0] mux2
+XSHL4 B[1]#32 Y[31:0] Y[29:0] 0#2 Z[31:0] mux2
+XSHL5 B[0]#32 Z[31:0] Z[30:0] 0 SHL[31:0] mux2
+
+XSHR1 B[4]#32 A[31:0] 0#16 A[31:16] P[31:0] mux2
+XSHR2 B[3]#32 P[31:0] 0#8 P[31:8] Q[31:0] mux2
+XSHR3 B[2]#32 Q[31:0] 0#4 Q[31:4] R[31:0] mux2
+XSHR4 B[1]#32 R[31:0] 0#2 R[31:2] S[31:0] mux2
+XSHR5 B[0]#32 S[31:0] 0 S[31:1] SHR[31:0] mux2
+
+XSRA1 B[4]#32 A[31:0] A[31]#16 A[31:16] G[31:0] mux2
+XSRA2 B[3]#32 G[31:0] G[31]#8 G[31:8] H[31:0] mux2
+XSRA3 B[2]#32 H[31:0] H[31]#4 H[31:4] J[31:0] mux2
+XSRA4 B[1]#32 J[31:0] J[31]#2 J[31:2] K[31:0] mux2
+XSRA5 B[0]#32 K[31:0] K[31] K[31:1] SRA[31:0] mux2
+
+X1 ALUFN[1]#32 ALUFN[0]#32 SHL[31:0] 0#32 SHR[31:0] SRA[31:0] shift[31:0] mux4
+.ends
+
+
+.subckt multiply32 A[31:0] B[31:0] bit[31:0]
+
+Xand0 A[31:0] B[0]#32  aa[31:0] and2
+Xand1 A[31:0] B[1]#32  ab[31:0] and2
+Xand2 A[31:0] B[2]#32  ac[31:0] and2
+Xand3 A[31:0] B[3]#32  ad[31:0] and2
+Xand4 A[31:0] B[4]#32  ae[31:0] and2
+Xand5 A[31:0] B[5]#32  af[31:0] and2
+Xand6 A[31:0] B[6]#32  ag[31:0] and2
+Xand7 A[31:0] B[7]#32  ah[31:0] and2
+Xand8 A[31:0] B[8]#32  ai[31:0] and2
+Xand9 A[31:0] B[9]#32  aj[31:0] and2
+Xand10 A[31:0] B[10]#32 ak[31:0] and2
+Xand11 A[31:0] B[11]#32 al[31:0] and2
+Xand12 A[31:0] B[12]#32 am[31:0] and2
+Xand13 A[31:0] B[13]#32 an[31:0] and2
+Xand14 A[31:0] B[14]#32 ao[31:0] and2
+Xand15 A[31:0] B[15]#32 ap[31:0] and2
+Xand16 A[31:0] B[16]#32 aq[31:0] and2
+Xand17 A[31:0] B[17]#32 ar[31:0] and2
+Xand18 A[31:0] B[18]#32 as[31:0] and2
+Xand19 A[31:0] B[19]#32 at[31:0] and2
+Xand20 A[31:0] B[20]#32 au[31:0] and2
+Xand21 A[31:0] B[21]#32 av[31:0] and2
+Xand22 A[31:0] B[22]#32 aw[31:0] and2
+Xand23 A[31:0] B[23]#32 ax[31:0] and2
+Xand24 A[31:0] B[24]#32 ay[31:0] and2
+Xand25 A[31:0] B[25]#32 az[31:0] and2
+Xand26 A[31:0] B[26]#32 ba[31:0] and2
+Xand27 A[31:0] B[27]#32 bb[31:0] and2
+Xand28 A[31:0] B[28]#32 bc[31:0] and2
+Xand29 A[31:0] B[29]#32 bd[31:0] and2
+Xand30 A[31:0] B[30]#32 be[31:0] and2
+Xand31 A[31:0] B[31]#32 bf[31:0] and2
+
+Xadd0 0 aa[31:0] ab[30:0] 0   aaa[31:0] zaaa vaaa naaa adder32
+Xadd1 0 aaa[31:0] ac[29:0] 0#2 aab[31:0] zaab vaab naab adder32 
+Xadd2 0 aab[31:0] ad[28:0] 0#3 aac[31:0] zaac vaac naac adder32
+Xadd3 0 aac[31:0] ae[27:0] 0#4 aad[31:0] zaad vaad naad adder32
+Xadd4 0 aad[31:0] af[26:0] 0#5 aae[31:0] zaae vaae naae adder32
+Xadd5 0 aae[31:0] ag[25:0] 0#6 aaf[31:0] zaaf vaaf naaf adder32
+Xadd6 0 aaf[31:0] ah[24:0] 0#7 aag[31:0] zaag vaag naag adder32
+Xadd7 0 aag[31:0] ai[23:0] 0#8 aah[31:0] zaah vaah naah adder32
+Xadd8 0 aah[31:0] aj[22:0] 0#9 aai[31:0] zaai vaai naai adder32
+Xadd9 0 aai[31:0] ak[21:0] 0#10 aaj[31:0] zaaj vaaj naaj adder32
+Xadd10 0 aaj[31:0] al[20:0] 0#11 aak[31:0] zaak vaak naak adder32
+Xadd11 0 aak[31:0] am[19:0] 0#12 aal[31:0] zaal vaal naal adder32
+Xadd12 0 aal[31:0] an[18:0] 0#13 aam[31:0] zaam vaam naam adder32
+Xadd13 0 aam[31:0] ao[17:0] 0#14 aan[31:0] zaan vaan naan adder32
+Xadd14 0 aan[31:0] ap[16:0] 0#15 aao[31:0] zaao vaao naao adder32
+Xadd15 0 aao[31:0] aq[15:0] 0#16 aap[31:0] zaap vaap naap adder32
+Xadd16 0 aap[31:0] ar[14:0] 0#17 aaq[31:0] zaaq vaaq naaq adder32
+Xadd17 0 aaq[31:0] as[13:0] 0#18 aar[31:0] zaar vaar naar adder32
+Xadd18 0 aar[31:0] at[12:0] 0#19 aas[31:0] zaas vaas naas adder32
+Xadd19 0 aas[31:0] au[11:0] 0#20 aat[31:0] zaat vaat naat adder32
+Xadd20 0 aat[31:0] av[10:0] 0#21 aau[31:0] zaau vaau naau adder32
+Xadd21 0 aau[31:0] aw[9:0]  0#22 aav[31:0] zaav vaav naav adder32
+Xadd22 0 aav[31:0] ax[8:0]  0#23 aaw[31:0] zaaw vaaw naaw adder32
+Xadd23 0 aaw[31:0] ay[7:0]  0#24 aax[31:0] zaax vaax naax adder32
+Xadd24 0 aax[31:0] az[6:0]  0#25 aay[31:0] zaay vaay naay adder32
+Xadd25 0 aay[31:0] ba[5:0]  0#26 aaz[31:0] zaaz vaaz naaz adder32
+Xadd26 0 aaz[31:0] bb[4:0]  0#27 aba[31:0] zaba vaba naba adder32
+Xadd27 0 aba[31:0] bc[3:0]  0#28 abb[31:0] zabb vabb nabb adder32
+Xadd28 0 abb[31:0] bd[2:0]  0#29 abc[31:0] zabc vabc nabc adder32
+Xadd29 0 abc[31:0] be[1:0]  0#30 abd[31:0] zabd vabd nabd adder32
+Xadd31 0 abd[31:0] bf[0] 0#31 bit[31:0] zabe vabe nabe adder32
+.ends
+
+
+.subckt addormul ALUFN[1:0] A[31:0] B[31:0] out[31:0] z v n
+Xadder ALUFN[0] A[31:0] B[31:0] S[31:0] z v n adder32
+Xmultiplier A[31:0] B[31:0] P[31:0] multiply32
+Xmx ALUFN[1]#32 S[31:0] P[31:0] out[31:0] mux2 
+.ends
+	
+.subckt alu ALUFN[5:0] A[31:0] B[31:0] alu[31:0] z v n
+Xad ALUFN[1:0] A[31:0] B[31:0] s[31:0] z v n addormul
+Xbo ALUFN[3:0] A[31:0] B[31:0] boole[31:0] boole32
+Xsh ALUFN[1:0] A[31:0] B[4:0] shift[31:0] shift32
+Xcm ALUFN[2:1] z v n cmp[31:0] compare32
+Xmu ALUFN[4]#32 ALUFN[5]#32 s[31:0] boole[31:0] shift[31:0] cmp[31:0] alu[31:0] mux4 
+.ends
